@@ -6,6 +6,7 @@ class ProtocolLookup:
     """
     Class to handle protocol lookup
     """
+
     def __init__(self, filename: str):
         self.protocol = self.load("protocol-map.csv")
 
@@ -40,6 +41,7 @@ class Lookup:
     """
     Class to handle the lookup table
     """
+
     def __init__(self, filename: str):
         self.lookup_map = self.load(filename)
 
@@ -78,6 +80,7 @@ class LogProcessor:
     """
     Class to process the flow logs
     """
+
     def __init__(self, log_file: str, lookup: Lookup, protocol: ProtocolLookup):
         self.log_file = log_file
         self.lookup = lookup
@@ -116,6 +119,7 @@ class OutputWriter:
     """
     Class to write the output to a file
     """
+
     @staticmethod
     def write_to_output(
         output_file: str, tag_mappings: dict, port_protocol_counts: dict
@@ -138,9 +142,17 @@ class OutputWriter:
                 file.write(f"{port},{protocol},{count}\n")
 
 
+# Run in the command line as follows: python main.py <lookup_table> <input_file> <output_file>
 if __name__ == "__main__":
+    # load the protocol mapping
     protocol_lookup = ProtocolLookup("protocol-map.csv")
-    lookup = Lookup("lookup.csv")
-    processor = LogProcessor("input.txt", lookup, protocol_lookup)
+
+    # load the lookup table
+    lookup = Lookup(sys.argv[1])
+
+    # process the log fiel to get the tag mappings and port protocol counts
+    processor = LogProcessor(sys.argv[2], lookup, protocol_lookup)
     tag_mappings, port_protocol_counts = processor.process_flow_logs()
-    OutputWriter.write_to_output("output.txt", tag_mappings, port_protocol_counts)
+
+    # write the output to the output file
+    OutputWriter.write_to_output(sys.argv[3], tag_mappings, port_protocol_counts)
