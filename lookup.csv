@@ -1,0 +1,12 @@
+dstport,protocol,tag
+25,6,sv_P1
+68,17,sv_P2
+23,6,sv_P1
+31,17,sv_P3
+443,6,sv_P2
+22,6,sv_P4
+3389,6,sv_P5
+0,1,sv_P5
+110,6,email
+993,6,email
+143,6,email
