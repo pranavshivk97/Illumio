@@ -3,10 +3,18 @@ import sys
 
 
 class ProtocolLookup:
+    """
+    Class to handle protocol lookup
+    """
     def __init__(self, filename: str):
         self.protocol = self.load("protocol-map.csv")
 
     def load(self, filename: str) -> dict:
+        """
+        Loads the protocol lookup, which maps from the protocol number to the protocol name
+        :param filename: filename to load the lookup
+        :return: dict that stores the protocol mappings
+        """
         protocol = {}
         with open(filename, newline="", mode="r") as file:
             reader = csv.DictReader(file)
@@ -19,15 +27,28 @@ class ProtocolLookup:
 
         return protocol
 
-    def get_string(self, protocol: int) -> str:
-        return self.protocol.get(protocol, "unknown")
+    def get_string(self, protocol_number: int) -> str:
+        """
+        Get the protocol string from the protocol number
+        :param protocol_number: the protocol number to get the string for
+        :return: protocol string from mapping
+        """
+        return self.protocol.get(protocol_number, "unknown")
 
 
 class Lookup:
+    """
+    Class to handle the lookup table
+    """
     def __init__(self, filename: str):
         self.lookup_map = self.load(filename)
 
     def load(self, filename: str) -> dict:
+        """
+        Load the lookup table from the csv file and store in a dictionary
+        :param filename: the file name to load the lookup table from
+        :return: the dictionary that stores the lookup table
+        """
         lookup = {}
         with open(filename, newline="", mode="r") as f:
             reader = csv.DictReader(f)
@@ -44,10 +65,19 @@ class Lookup:
         return lookup
 
     def get_tag(self, dstport: int, protocol: str) -> str:
+        """
+        Searches the lookup table for the tag based on the destination port and protocol
+        :param dstport: the destination port to search for
+        :param protocol: the protocol to search for
+        :return: the tag found from the lookup table
+        """
         return self.lookup_map.get((dstport, protocol), "Untagged")
 
 
 class LogProcessor:
+    """
+    Class to process the flow logs
+    """
     def __init__(self, log_file: str, lookup: Lookup, protocol: ProtocolLookup):
         self.log_file = log_file
         self.lookup = lookup
@@ -59,6 +89,10 @@ class LogProcessor:
         self.port_protocol_counts = {}
 
     def process_flow_logs(self) -> (dict, dict):
+        """
+        Processes the log file and updates the tag mappings and port protocol counts
+        :return: updated tag mappings and port protocol combinations as dictionaries
+        """
         with open(self.log_file, newline="", mode="r") as file:
             for line in file.readlines():
                 fields = line.split()
@@ -79,10 +113,19 @@ class LogProcessor:
 
 
 class OutputWriter:
+    """
+    Class to write the output to a file
+    """
     @staticmethod
     def write_to_output(
-        output_file: str, tag_mappings: dict, port_protocol: dict
+        output_file: str, tag_mappings: dict, port_protocol_counts: dict
     ) -> None:
+        """
+        Writes the tag mappings and port protocol counts to the output file
+        :param output_file: the output file to write to
+        :param tag_mappings: the tag mappings write to the file
+        :param port_protocol_counts: the port protocol combinations to write to the file
+        """
         with open(output_file, newline="", mode="w") as file:
             file.write("Tag Counts:\n\n")
             for tag, count in tag_mappings.items():
@@ -91,7 +134,7 @@ class OutputWriter:
 
             file.write("\nPort/Protocol Combination Counts:\n\n")
 
-            for (port, protocol), count in port_protocol.items():
+            for (port, protocol), count in port_protocol_counts.items():
                 file.write(f"{port},{protocol},{count}\n")
 
 
